@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101827">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://en.wiktionary.org; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
 <title>WordFinder — Smart Puzzle Solver</title>
 <style>
 :root {
@@ -154,7 +154,7 @@ h2 { font-size: 17px; margin: 0 0 5px; letter-spacing: -.02em; }
 
 .tag.adj { color: #1a1406; background: var(--gold); border-radius: 999px; padding: 1px 6px; margin-left: 4px; }
 .word.adjword { border-color: #8a6a2e; }
-.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.answers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
 .answer {
   min-width: 0; margin: 0; text-align: left; cursor: pointer; color: var(--ink);
   border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
@@ -162,14 +162,118 @@ h2 { font-size: 17px; margin: 0 0 5px; letter-spacing: -.02em; }
 .answer strong { font-size: clamp(18px, 2.4vw, 28px); font-weight: 950; letter-spacing: .04em; line-height: 1.1; overflow-wrap: anywhere; }
 .wordbox { background: #10241f; border: 1px solid #3d6b58; }
 .wordbox strong { color: var(--mint); }
-.adjbox { background: linear-gradient(180deg, #2a2212, #1a160e); border: 1px solid #8a6a2e; }
+.adjbox { background: #241c10; border: 1px solid #8a6a2e; }
 .adjbox strong { color: var(--gold); }
+.verbbox { background: #121c2e; border: 1px solid #3d5f8a; }
+.verbbox strong { color: var(--blue); }
+.entry {
+  margin-top: 14px; border: 1px solid var(--line); border-radius: 16px;
+  background: #0e1728; padding: 16px 18px 12px;
+}
+.entry-word {
+  margin: 0; font-family: Georgia, "Iowan Old Style", Palatino, serif;
+  font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -.03em; line-height: 1.05;
+}
+.entry-kicker { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+.entry-pos {
+  margin: 16px 0 6px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold);
+}
+.entry ol { margin: 0; padding-left: 1.25em; }
+.entry li { margin: 0 0 12px; }
+.entry li p { margin: 0; }
+.entry-example {
+  margin-top: 4px; color: var(--muted); font-family: Georgia, "Iowan Old Style", Palatino, serif; font-style: italic;
+}
+.entry-credit { margin: 4px 0 0; font-size: 11px; color: var(--muted); }
+.tag.verb { color: #e7f0ff; background: #1d3d66; border-radius: 999px; padding: 1px 6px; margin-left: 4px; }
 .answer:hover { filter: brightness(1.08); }
 .answer.on { box-shadow: 0 0 0 2px var(--mint); }
 .answer:focus-visible { outline: 2px solid white; outline-offset: 2px; }
 .answer:disabled { cursor: default; filter: none; }
 .answer:disabled strong { color: var(--muted); font-size: 22px; }
-@media (max-width: 640px) { .answers { grid-template-columns: 1fr; } }
+@media (max-width: 860px) {
+  .answers { grid-template-columns: 1fr 1fr; }
+  #verbBest { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) { .answers { grid-template-columns: 1fr; } #verbBest { grid-column: auto; } }
+body { overflow-x: clip; }
+.card, .grid, .chips, .wordgrid { min-width: 0; }
+.statuspill { white-space: normal; text-align: center; max-width: 100%; }
+.option select { max-width: 100%; }
+.actions .btn { min-height: 44px; }
+@media (max-width: 720px) {
+  main { padding: 16px 12px 48px; }
+  h1 { font-size: 28px; }
+  .sub { margin-bottom: 14px; }
+  .card { padding: 14px; border-radius: 16px; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .actions .btn { width: 100%; }
+  .options { display: grid; grid-template-columns: 1fr; }
+  .modes { flex-direction: column; }
+  .board { gap: 6px; }
+  .tile { font-size: 22px; border-radius: 10px; }
+  .wordgrid { grid-template-columns: 1fr 1fr; }
+  .pathword { font-size: 22px; }
+  .scroller { max-height: none; }
+}
+@media (max-width: 380px) {
+  .actions, .wordgrid, .stats { grid-template-columns: 1fr; }
+}
+@media (min-width: 1400px) {
+  main { max-width: 1280px; }
+}
+html { overflow-x: clip; }
+body { font-size: 16px; }
+main {
+  width: min(100%, 1280px);
+  padding-left: max(12px, env(safe-area-inset-left));
+  padding-right: max(12px, env(safe-area-inset-right));
+}
+.grid { grid-template-columns: minmax(0, 420px) minmax(0, 1fr); }
+.brand, .top, .resultshead { min-width: 0; }
+.sub { max-width: 68ch; }
+.gamewatch {
+  margin: 12px 0 0; padding: 12px 14px; border-radius: 14px;
+  background: #10241f; border: 1px solid #3d6b58; color: var(--mint);
+  font-size: 15px; font-weight: 750; line-height: 1.4;
+}
+.gamewatch.is-paused { background: #2a1c0c; border-color: #e2b15a; color: #ffe3a8; }
+.gamewatch.is-hot { background: #152238; border-color: #6d97d4; color: #e5f0ff; }
+body.is-paused { box-shadow: inset 0 4px 0 #e2b15a; }
+.playbar { display: grid; gap: 8px; margin-top: 10px; }
+.playbar .gamewatch { margin: 0; }
+.play-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.play-actions .btn { width: 100%; min-height: 48px; }
+.pause-toggle {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; line-height: 1.15; background: #202e44; color: var(--ink); border: 1px solid var(--line);
+}
+.pause-toggle .pause-hint { font-size: 11px; font-weight: 650; opacity: .82; }
+.btn.paused, .pause-toggle.paused { background: #8a5a12; color: #fff8e8; border-color: #e2b15a; }
+.options { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.option { justify-content: space-between; min-height: 42px; }
+.option select { margin-left: 8px; min-height: 32px; font-size: 16px; }
+#rack, #filter { font-size: 16px; }
+#rack { letter-spacing: 0.04em; font-size: clamp(13px, 3.4vw, 18px); }
+@media (min-width: 360px) { .modes { flex-direction: row; } }
+.board { width: min(100%, 460px); margin-inline: auto; }
+.answers { grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); }
+#verbBest { grid-column: auto; }
+.answer { container-type: inline-size; }
+.answer strong { font-size: clamp(15px, 9.2cqi, 28px); letter-spacing: 0.02em; }
+.answer strong, .pathword, .entry-word, .wordname { overflow-wrap: anywhere; }
+.entry { line-height: 1.55; max-width: 72ch; }
+.entry li p { max-width: 68ch; }
+.word { flex-wrap: wrap; }
+.wordgrid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); }
+.chips, .toolbar, .pathbox, .entry, .playbar, .actions { max-width: 100%; }
+@media (max-width: 980px) {
+  .grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 340px) {
+  .play-actions, .actions { grid-template-columns: 1fr; }
+  .actions .btn:last-child:nth-child(odd) { grid-column: auto; }
+}
 </style>
 </head>
 <body>
@@ -184,11 +288,10 @@ h2 { font-size: 17px; margin: 0 0 5px; letter-spacing: -.02em; }
   </div>
   <div class="statuspill" id="liveStatus">Offline</div>
 </header>
-<p class="sub">Paste 16 letters. The two cards show the longest word and the longest adjective. Click a card to mark its tiles. Offline uses the built-in list. Online adds more words and ranks everyday words first.</p>
+<p class="sub">Sixteen letters. Tap a word for its English definition and an example.</p>
 <div class="grid">
 <section class="card">
   <h2>Letter board</h2>
-  <div class="tiny">Paste the whole set in the letters box, or type one tile at a time. Arrow keys move around the board.</div>
   <label class="racklabel" for="rack">Letters</label>
   <input id="rack" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Paste up to 16 letters" aria-label="Letters to search">
   <div class="modes" role="radiogroup" aria-label="How words may use the letters">
@@ -214,13 +317,13 @@ h2 { font-size: 17px; margin: 0 0 5px; letter-spacing: -.02em; }
     <div class="stat"><strong id="dictSize">—</strong><span id="dictLabel">dictionary</span></div>
   </div>
   <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
-  <p class="mode-note" id="modeNote">Built-in dictionary is ready.</p>
+  <p class="mode-note" id="modeNote"></p>
 </section>
 <section class="card">
   <div class="resultshead">
     <div>
       <h2>Found words</h2>
-      <div class="tiny" id="resultsHint">Click a card to mark its tiles.</div>
+      <div class="tiny" id="resultsHint">Waiting for 16 letters.</div>
     </div>
     <div class="statuspill" id="resultStatus">Waiting for letters</div>
   </div>
@@ -235,7 +338,18 @@ h2 { font-size: 17px; margin: 0 0 5px; letter-spacing: -.02em; }
       <strong id="adjWord">—</strong>
       <span class="tiny" id="adjMeta">Add all 16 letters.</span>
     </button>
+    <button type="button" class="answer verbbox" id="verbBest" disabled>
+      <span class="tiny">Longest verb</span>
+      <strong id="verbWord">—</strong>
+      <span class="tiny" id="verbMeta">Add all 16 letters.</span>
+    </button>
   </div>
+  <article class="entry" id="dictEntry" hidden>
+    <h3 class="entry-word" id="dictWord">—</h3>
+    <p class="entry-kicker" id="dictKicker"></p>
+    <div id="dictBody"></div>
+    <p class="entry-credit">English definitions and examples from Wiktionary.</p>
+  </article>
   <p class="longnote" id="longNote" hidden>Longest words appear here.</p>
   <div class="chips" id="minChips" aria-label="Minimum length">
     <button type="button" class="chip on" data-min="10">10–16</button>
@@ -257,7 +371,6 @@ h2 { font-size: 17px; margin: 0 0 5px; letter-spacing: -.02em; }
     <div class="best" id="best"></div>
     <div id="groups"><div class="empty">Enter or change a letter to start searching.</div></div>
   </div>
-  <p class="foot">Unscramble uses each letter only as often as it appears, in any order. Touching tiles also requires neighboring squares, including diagonals. Adjective marks a describing word, and the gold card is the longest one. Game dictionaries differ, so an unusual word here may be rejected by a phone game.</p>
 </section>
 </div>
 </main>
@@ -313,7 +426,7 @@ function setStatus(kind, note) {
   };
   pill.textContent = labels[kind] || 'Offline';
   pill.className = 'statuspill' + (kind === 'online' || kind === 'saved' ? '' : ' ' + (kind === 'loading' ? 'loading' : 'offline'));
-  if (note) document.getElementById('modeNote').textContent = note;
+  document.getElementById('modeNote').textContent = note || '';
 }
 
 function updateDictStat() {
@@ -448,6 +561,21 @@ function searchUnscramble(letters, minLen) {
   return found;
 }
 
+let verbSet = new Set();
+const dictCache = new Map();
+
+function longestVerb() {
+  const familiarOnly = document.getElementById('familiarOnly').checked;
+  let best = null;
+  for (const item of results) {
+    if (!verbSet.has(item.word)) continue;
+    if (familiarOnly && !freq.has(item.word)) continue;
+    if (textFilter && !item.word.includes(textFilter)) continue;
+    if (!best || compareSmart(item, best) < 0) best = item;
+  }
+  return best;
+}
+
 function longestAdjective() {
   const familiarOnly = document.getElementById('familiarOnly').checked;
   let best = null;
@@ -524,6 +652,21 @@ function updateAdjective() {
     adj,
     adjTies,
     everyday
+  );
+  const verb = longestVerb();
+  let verbTies = 0;
+  if (verb) {
+    for (const item of results) {
+      if (verbSet.has(item.word) && item.word.length === verb.word.length) verbTies++;
+    }
+  }
+  fillAnswer(
+    document.getElementById('verbBest'),
+    document.getElementById('verbWord'),
+    document.getElementById('verbMeta'),
+    verb,
+    verbTies,
+    null
   );
   const note = document.getElementById('longNote');
   if (!results.length) {
@@ -664,6 +807,12 @@ function wordButton(item) {
     adjTag.textContent = 'Adjective';
     left.append(adjTag);
   }
+  if (verbSet.has(item.word)) {
+    const verbTag = document.createElement('span');
+    verbTag.className = 'tag verb';
+    verbTag.textContent = 'Verb';
+    left.append(verbTag);
+  }
   const len = document.createElement('span');
   len.className = 'length';
   len.textContent = String(item.word.length);
@@ -775,6 +924,7 @@ function showPath(item) {
   });
   document.querySelectorAll('.word.selected').forEach((node) => node.classList.remove('selected'));
   if (!item) {
+    document.getElementById('dictEntry').hidden = true;
     document.getElementById('pathword').textContent = '—';
     document.getElementById('pathcoords').textContent = playMode() === 'unscramble'
       ? 'Select a word to see which tiles supply its letters.'
@@ -795,11 +945,85 @@ function showPath(item) {
   document.getElementById('pathcoords').textContent = (playMode() === 'unscramble' ? 'Letters used in word order: ' : 'Follow the tiles in this order: ') + steps;
 }
 
+function plainText(html) {
+  const holder = document.createElement('div');
+  holder.innerHTML = html;
+  holder.querySelectorAll('style, script, sup, .mw-empty-elt').forEach((node) => node.remove());
+  return (holder.textContent || '').replace(/\s+/g, ' ').replace(/\s+([.,;:!?])/g, '$1').trim();
+}
+
+async function showDictionary(word) {
+  const panel = document.getElementById('dictEntry');
+  const body = document.getElementById('dictBody');
+  panel.hidden = false;
+  document.getElementById('dictWord').textContent = word;
+  const marks = [];
+  if (adjectiveSet.has(word)) marks.push('adjective');
+  if (verbSet.has(word)) marks.push('verb');
+  document.getElementById('dictKicker').textContent = marks.length ? 'Marked here as ' + marks.join(' and ') + '.' : '';
+  body.textContent = 'Looking up the English entry…';
+  try {
+    let senses = dictCache.get(word);
+    if (!senses) {
+      const res = await fetch('https://en.wiktionary.org/api/rest_v1/page/definition/' + encodeURIComponent(word));
+      if (!res.ok) throw new Error('missing');
+      const data = await res.json();
+      senses = (data.en || []).map((block) => ({
+        pos: block.partOfSpeech || 'Entry',
+        defs: (block.definitions || []).slice(0, 3).map((item) => ({
+          text: plainText(item.definition || '').slice(0, 360),
+          example: item.examples && item.examples[0] ? plainText(item.examples[0]).slice(0, 240) : ''
+        })).filter((item) => item.text)
+      })).filter((block) => block.defs.length);
+      dictCache.set(word, senses);
+    }
+    body.replaceChildren();
+    if (!senses.length) {
+      body.textContent = 'No English dictionary entry for this word.';
+      return;
+    }
+    senses.forEach((block) => {
+      const heading = document.createElement('h4');
+      heading.className = 'entry-pos';
+      heading.textContent = block.pos;
+      const list = document.createElement('ol');
+      block.defs.forEach((item) => {
+        const li = document.createElement('li');
+        const meaning = document.createElement('p');
+        meaning.textContent = item.text;
+        li.appendChild(meaning);
+        if (item.example) {
+          const example = document.createElement('p');
+          example.className = 'entry-example';
+          example.textContent = item.example;
+          li.appendChild(example);
+        }
+        list.appendChild(li);
+      });
+      body.append(heading, list);
+    });
+  } catch (error) {
+    body.textContent = 'The English entry could not be loaded. Try the word again in a moment.';
+  }
+}
+
 function selectWord(word) {
   const item = results.find((entry) => entry.word === word);
   if (!item) return;
   activeWord = word;
   showPath(item);
+  showDictionary(word);
+}
+
+async function loadVerbs() {
+  try {
+    const res = await fetch('verbs.txt', { cache: 'no-store' });
+    if (!res.ok) return;
+    const text = await res.text();
+    if (text.startsWith('<')) return;
+    verbSet = new Set(text.trim().split(/\s+/).filter((word) => /^[a-z]+$/.test(word)));
+    if (results.length) renderResults();
+  } catch (error) {}
 }
 
 function openDb() {
@@ -851,14 +1075,14 @@ async function applyExpansion(alphaText, freqText) {
 
 async function fetchOnline() {
   if (appliedOnline) {
-    setStatus('online', 'Smart online is on. ' + onlineAdded.toLocaleString() + ' extra words are loaded, and common words are ranked first.');
+    setStatus('online');
     return;
   }
   if (!navigator.onLine) {
     setStatus('offline', 'No connection. The built-in dictionary is still active.');
     return;
   }
-  setStatus('loading', 'Loading the larger word list included with this page…');
+  setStatus('loading');
   try {
     const [dictResponse, freqResponse] = await Promise.all([fetch(DICT_URL), fetch(FREQ_URL)]);
     if (!dictResponse.ok || !freqResponse.ok) throw new Error('Word list request failed');
@@ -869,7 +1093,7 @@ async function fetchOnline() {
       await dbSet(db, 'alpha', alphaText);
       await dbSet(db, 'freq', freqText);
     } catch (error) {}
-    setStatus('online', 'Smart online is on. Added ' + onlineAdded.toLocaleString() + ' words and ranked everyday English first. This list stays on the device for offline use.');
+    setStatus('online');
   } catch (error) {
     if (!appliedOnline) setStatus('offline', 'Could not reach the online list. The built-in dictionary is still active.');
   }
@@ -877,14 +1101,14 @@ async function fetchOnline() {
 
 async function bootstrap() {
   updateDictStat();
-  setStatus('offline', 'Built-in dictionary is ready. Checking for a saved or online list…');
+  setStatus('offline');
   try {
     const db = await openDb();
     const [alphaText, freqText] = await Promise.all([dbGet(db, 'alpha'), dbGet(db, 'freq')]);
     if (alphaText && freqText) {
-      setStatus('saved', 'Loading the larger dictionary saved on this device…');
+      setStatus('loading');
       await applyExpansion(alphaText, freqText);
-      setStatus('saved', 'Using the larger dictionary saved on this device. Common words are ranked first.');
+      setStatus('saved');
     }
   } catch (error) {}
   if (navigator.onLine) await fetchOnline();
@@ -962,6 +1186,10 @@ document.getElementById('adjectivesOnly').addEventListener('change', () => {
   if (preferred) activeWord = preferred.word;
   renderResults();
 });
+document.getElementById('verbBest').addEventListener('click', () => {
+  const word = document.getElementById('verbBest').dataset.word;
+  if (word) selectWord(word);
+});
 document.getElementById('adjBest').addEventListener('click', () => {
   const word = document.getElementById('adjBest').dataset.word;
   if (word) selectWord(word);
@@ -973,8 +1201,10 @@ document.getElementById('longBest').addEventListener('click', () => {
 document.getElementById('retryOnline').addEventListener('click', () => fetchOnline());
 window.addEventListener('online', () => fetchOnline());
 
-makeBoard(EXAMPLE);
-scheduleSearch(0);
+makeBoard(Array(16).fill(''));
+document.getElementById('resultStatus').textContent = 'Waiting for letters';
+renderResults('Enter all 16 letters to begin.');
+loadVerbs();
 bootstrap();
 </script>
 </body>
